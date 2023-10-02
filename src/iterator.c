@@ -7,13 +7,13 @@ struct Iterator iter_from_linked_list(struct LinkedList *list) {
   return iterator;
 }
 
-struct Node* iter_next(struct Iterator *iterator) {
-  struct Node* val = iterator->node;
-  iterator->node = iterator->node->next; 
+struct Node *iter_next(struct Iterator *iterator) {
+  struct Node *val = iterator->node;
+  if (val == 0) {
+    return 0;
+  }
+  iterator->node = iterator->node->next;
   return val;
 }
 
-int has_next(struct Iterator *iterator) {
-  return iterator->node != 0;
-}
-
+int has_next(struct Iterator *iterator) { return iterator->node != 0; }

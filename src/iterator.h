@@ -1,3 +1,6 @@
+#ifndef ITERATOR_H
+#define ITERATOR_H
+
 #include "linked_list.h"
 
 struct Iterator {
@@ -6,3 +9,5 @@ struct Iterator {
 
 struct Iterator iter_from_linked_list(struct LinkedList* list);
 struct Node* iter_next(struct Iterator *iter);
+
+#endif
