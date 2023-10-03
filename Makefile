@@ -7,14 +7,19 @@ name := cx_chat
 #------------------------------------------------#
 SRC_DIR := src
 BUILD_DIR := .build
+TEST_DIR := test
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-DEPS := $(OBJS:.o=.d)
+
+TEST_SRCS := $(wildcard $(TEST_DIR)/*.c)
+TEST_OBJS := $(TEST_SRCS:$(TEST_DIR)/%.c=$(BUILD_DIR)/%.o)
+
+DEPS = $(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
 
 CPPFLAGS := -I./src
 CC          := clang
-#CFLAGS      := -Wall -Wextra -Werror
+CFLAGS      := -Wunsused-command-line-argument -lssl -lcrypto 
 CPPFLAGS    := -MMD -MP -I include
 AR          := ar
 ARFLAGS     := -r -c -s
@@ -46,7 +51,7 @@ run: all
 	./$(name)
 
 clean:
-	$(RM) $(OBJS) $(DEPS)
+	$(RM) $(OBJS) $(DEPS) $(TEST_OBJS)
 
 fclean: clean
 	$(RM) $(name)
@@ -56,9 +61,14 @@ re:
 	$(MAKE) all
 
 # Add test target
-test:
-	gcc -g ./src/linked_list.c ./src/iterator.c ./src/websocket.c ./test/test_suite.c ./test/linked_list_test.c ./test/websocket_test.c  ./src/base64.c ./test/base64_test.c -o run-test
-	./run-test
+test: fclean $(OBJS) $(TEST_OBJS)
+	$(CC) $(CFLAGS) $(filter-out .build/runner.o, $(OBJS)) $(TEST_OBJS) -o run_test
+	./run_test
+
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.c
+	$(DIR_DUP)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(info CREATED: $@)
 
 #------------------------------------------------#
 #   SPEC                                         #
