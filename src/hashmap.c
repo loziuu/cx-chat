@@ -1,10 +1,11 @@
 #include "hashmap.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 // MAKE BUCKETS LAZY!
 struct HashMap *hashmap_init() {
-  struct HashMap *map = malloc(sizeof(struct HashMap));
+  struct HashMap *map = malloc(sizeof(struct HashMap *));
   map->buckets = calloc(HASHMAP_BUCKETS, sizeof(struct HashMapBucket *));
   map->size = HASHMAP_BUCKETS;
   return map;
@@ -13,13 +14,6 @@ struct HashMap *hashmap_init() {
 hash_t calculcate_hash(char *key) { return 0; }
 
 void hashmap_put(struct HashMap *map, char *key, void *data) {
-  // Calculate the hash
-  // Get the bucket
-  // Check if the key exists
-  // If it does, replace the data
-  // If it doesn't, add it to the bucket
-  // If the bucket is full, resize the hashmap, it's linked list so not really
-  // If the hashmap is full, resize the hashmap, well... look above.
   hash_t hash = calculcate_hash(key);
   uint32_t bucket_index = hash % map->size;
   struct HashMapBucket *bucket = &map->buckets[bucket_index];
@@ -37,7 +31,11 @@ void hashmap_put(struct HashMap *map, char *key, void *data) {
   new_node->hash = hash;
   new_node->key = key;
   new_node->data = data;
-  prev->next = new_node;
+  if (prev != NULL) {
+    prev->next = new_node;
+  } else { 
+    bucket->head = new_node;
+  }
 }
 
 void *hashmap_get(struct HashMap *map, char *key) { 
@@ -45,7 +43,7 @@ void *hashmap_get(struct HashMap *map, char *key) {
   uint32_t bucket_index = hash % map->size;
   struct HashMapBucket *bucket = &map->buckets[bucket_index];
   if (bucket->head == NULL) {
-    return NULL;
+    return 0;
   }
   struct HashMapNode *node = bucket->head;
   while (node != NULL) {

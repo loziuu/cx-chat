@@ -20,7 +20,7 @@ DEPS = $(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
 CPPFLAGS := -I./src
 CC          := clang
 CFLAGS      := -Wunsused-command-line-argument -lssl -lcrypto 
-CPPFLAGS    := -MMD -MP -I include
+CPPFLAGS    := -g -MMD -MP -I include
 AR          := ar
 ARFLAGS     := -r -c -s
 
@@ -55,6 +55,7 @@ clean:
 
 fclean: clean
 	$(RM) $(name)
+	$(RM) ./run_tesu
 
 re:
 	$(MAKE) fclean
