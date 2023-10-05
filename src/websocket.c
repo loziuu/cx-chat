@@ -43,8 +43,8 @@ void websocket_handle(int connfd) {
   // Read in loop, for now it's just bulk read into mem.
   read(connfd, request, sizeof(request));
 
-  struct LinkedList *lines = str_split_lines(request);
-  struct Node *node = lines->head;
+  LinkedList *lines = str_split_lines(request);
+  Node *node = lines->head;
 
   printf("Printing request lines: \n");
   while (node != 0) {

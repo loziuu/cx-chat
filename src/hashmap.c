@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 // MAKE BUCKETS LAZY!
-struct HashMap *hashmap_init() {
-  struct HashMap *map = malloc(sizeof(struct HashMap *));
+HashMap *hashmap_init() {
+  HashMap *map = malloc(sizeof(HashMap));
   map->buckets = calloc(HASHMAP_BUCKETS, sizeof(struct HashMapBucket *));
   map->size = HASHMAP_BUCKETS;
   return map;
@@ -13,13 +13,13 @@ struct HashMap *hashmap_init() {
 
 hash_t calculcate_hash(char *key) { return 0; }
 
-void hashmap_put(struct HashMap *map, char *key, void *data) {
+void hashmap_put(HashMap *map, char *key, void *data) {
   hash_t hash = calculcate_hash(key);
   uint32_t bucket_index = hash % map->size;
-  struct HashMapBucket *bucket = &map->buckets[bucket_index];
+  HashMapBucket *bucket = &map->buckets[bucket_index];
 
-  struct HashMapNode *prev = NULL;
-  struct HashMapNode *node = bucket->head;
+  HashMapNode *prev = NULL;
+  HashMapNode *node = bucket->head;
   while (node != NULL) {
     if (node->hash == hash && node->key == key) {
       node->data = data; 
@@ -27,7 +27,7 @@ void hashmap_put(struct HashMap *map, char *key, void *data) {
     }
     prev = node;
   }
-  struct HashMapNode *new_node = malloc(sizeof(struct HashMapNode));
+  HashMapNode *new_node = malloc(sizeof(HashMapNode));
   new_node->hash = hash;
   new_node->key = key;
   new_node->data = data;
@@ -38,10 +38,10 @@ void hashmap_put(struct HashMap *map, char *key, void *data) {
   }
 }
 
-void *hashmap_get(struct HashMap *map, char *key) { 
+void *hashmap_get(HashMap *map, char *key) { 
   hash_t hash = calculcate_hash(key);
   uint32_t bucket_index = hash % map->size;
-  struct HashMapBucket *bucket = &map->buckets[bucket_index];
+  HashMapBucket *bucket = &map->buckets[bucket_index];
   if (bucket->head == NULL) {
     return 0;
   }
@@ -54,19 +54,19 @@ void *hashmap_get(struct HashMap *map, char *key) {
   return 0;
 }
 
-void free_bucket(struct HashMapBucket *bucket) {
-  struct HashMapNode *node = bucket->head;
+void free_bucket(HashMapBucket *bucket) {
+  HashMapNode *node = bucket->head;
   while (node != NULL) {
-    struct HashMapNode *next = node->next;
+    HashMapNode *next = node->next;
     free(node);
     node = next;
   }
   free(bucket);
 }
 
-void hashmap_free(struct HashMap *map) {
+void hashmap_free(HashMap *map) {
   for (int i = 0; i < map->size; i++) {
-    struct HashMapBucket *bucket = &map->buckets[i];
+    HashMapBucket *bucket = &map->buckets[i];
     free_bucket(bucket);
   }
   free(map);

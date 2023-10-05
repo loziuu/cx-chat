@@ -1,14 +1,15 @@
 #include "iterator.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-struct Iterator iter_from_linked_list(struct LinkedList *list) {
-  struct Iterator iterator;
-  iterator.node = list->head;
+Iterator *iter_from_linked_list(LinkedList *list) {
+  Iterator *iterator = malloc(sizeof(Iterator));
+  iterator->node = list->head;
   return iterator;
 }
 
-struct Node *iter_next(struct Iterator *iterator) {
-  struct Node *val = iterator->node;
+Node *iter_next(Iterator *iterator) {
+  Node *val = iterator->node;
   if (val == 0) {
     return 0;
   }
@@ -16,4 +17,9 @@ struct Node *iter_next(struct Iterator *iterator) {
   return val;
 }
 
-int has_next(struct Iterator *iterator) { return iterator->node != 0; }
+int has_next(Iterator *iterator) { return iterator->node != 0; }
+
+void iter_free(Iterator *iter) {
+  free(iter);
+}
+

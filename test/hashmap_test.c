@@ -4,7 +4,7 @@
 #include "../src/hashmap.h"
 
 void test_hashmap_init() {
-  struct HashMap *map = hashmap_init(); 
+  HashMap *map = hashmap_init(); 
   hashmap_put(map, "Content-Type", "application/json");
 
   char* val = (char*) hashmap_get(map, "Content-Type");
@@ -13,7 +13,7 @@ void test_hashmap_init() {
 }
 
 void test_empty_hashmap() {
-  struct HashMap *map = hashmap_init(); 
+  HashMap *map = hashmap_init(); 
 
   char* val = (char*) hashmap_get(map, "Content-Type");
 

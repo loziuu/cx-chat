@@ -8,28 +8,25 @@
 
 typedef uint32_t hash_t;
 
-struct HashMapNode {
+typedef struct HashMapNode {
   char *key;
   hash_t hash;
   void *data;
   struct HashMapNode *next;
-};
+} HashMapNode;
 
-struct HashMapBucket {
+typedef struct {
   struct HashMapNode *head;
-};
+} HashMapBucket;
 
-struct HashMap {
+typedef struct {
   int size;
-  struct HashMapBucket *buckets;
-};
+  HashMapBucket *buckets;
+} HashMap;
 
-struct HashMap *hashmap_init();
-
-void hashmap_put(struct HashMap *map, char *key, void *data);
-
-void *hashmap_get(struct HashMap *map, char *key);
-
-void hashmap_free(struct HashMap *map);
+HashMap *hashmap_init();
+void hashmap_put(HashMap *map, char *key, void *data);
+void *hashmap_get(HashMap *map, char *key);
+void hashmap_free(HashMap *map);
 
 #endif

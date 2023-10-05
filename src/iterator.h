@@ -3,11 +3,12 @@
 
 #include "linked_list.h"
 
-struct Iterator {
-  struct Node *node;
-};
+typedef struct {
+  Node *node;
+} Iterator;
 
-struct Iterator iter_from_linked_list(struct LinkedList* list);
-struct Node* iter_next(struct Iterator *iter);
+Iterator *iter_from_linked_list(LinkedList *list);
+Node *iter_next(Iterator *iter);
+void iter_free(Iterator *iter);
 
 #endif

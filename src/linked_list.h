@@ -1,21 +1,27 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
-struct Node {
+#include <stdlib.h>
+
+typedef struct Node {
   void *data;
   struct Node *next;
-};
+} Node;
 
-struct LinkedList {
+typedef struct {
   struct Node *head;
   struct Node *tail;
-};
+} LinkedList;
 
-int node_has_next(struct Node *node);
-void linked_list_push(struct LinkedList *list, void *data);
-struct LinkedList *str_split(char *data, char delim);
-struct LinkedList *str_split_lines(char *data);
-void linked_list_free(struct LinkedList *list);
-void node_free(struct Node *list);
+LinkedList *linked_list_new();
+int node_has_next(Node *node);
+
+void linked_list_push(LinkedList *list, void *data, size_t size);
+Node *linked_list_pop(LinkedList *list);
+
+void linked_list_free(LinkedList *list);
+
+LinkedList *str_split(char *data, char delim);
+LinkedList *str_split_lines(char *data);
 
 #endif
