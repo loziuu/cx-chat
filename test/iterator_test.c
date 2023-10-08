@@ -54,7 +54,7 @@ void test_http_json_request() {
 
 void iterator_tests() {
   test_no_split();
-//  test_http_json_request();
+  test_http_json_request();
   test_simple_linked_list();
   test_split_string_whitespace();
   printf("All iterator tests... success!\n");

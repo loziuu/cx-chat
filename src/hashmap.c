@@ -6,12 +6,23 @@
 // MAKE BUCKETS LAZY!
 HashMap *hashmap_init() {
   HashMap *map = malloc(sizeof(HashMap));
-  map->buckets = calloc(HASHMAP_BUCKETS, sizeof(struct HashMapBucket *));
+  map->buckets = calloc(HASHMAP_BUCKETS, sizeof(HashMapBucket *));
   map->size = HASHMAP_BUCKETS;
   return map;
 }
 
-hash_t calculcate_hash(char *key) { return 0; }
+// DJB2 hash function
+hash_t calculcate_hash(char *key) { 
+  hash_t hash = 5831;
+  char *c = key;
+
+  while (*c != '\0') {
+    hash = ((hash << 5) + hash) + *c; 
+    c++;
+  }
+
+  return hash;
+}
 
 void hashmap_put(HashMap *map, char *key, void *data) {
   hash_t hash = calculcate_hash(key);
