@@ -16,12 +16,12 @@ typedef struct HashMapNode {
 } HashMapNode;
 
 typedef struct {
-  struct HashMapNode *head;
+  HashMapNode *head;
 } HashMapBucket;
 
 typedef struct {
   int size;
-  HashMapBucket *buckets;
+  HashMapBucket *buckets[HASHMAP_BUCKETS];
 } HashMap;
 
 HashMap *hashmap_init();

@@ -67,7 +67,7 @@ void base64_encode(void *val, char *buf, int len) {
 void *base64_encode_allocate(void *val, int len) {
   int padding = len % 3;
   int output_len = (len / 3 + padding) * 4;
-  char *output = malloc(output_len);
+  char *output = calloc(output_len + 1, sizeof(char));
   base64_encode(val, output, len);
   return output;
 }

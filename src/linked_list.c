@@ -13,14 +13,17 @@ LinkedList *linked_list_new() {
 
 int node_has_next(Node *node) { return node->next != 0; }
 
+// Where does head point at after second push?
 void linked_list_push(LinkedList *list, void *data, size_t size) {
   if (list->head == 0) {
     list->head = malloc(sizeof(Node));
     list->head->data = memutils_copy(data, size);
+    list->head->next = 0;
     list->tail = list->head;
   } else {
     Node *new_node = malloc(sizeof(Node));
     new_node->data = memutils_copy(data, size);
+    new_node->next = 0;
     list->tail->next = new_node;
     list->tail = new_node;
   }
@@ -35,11 +38,12 @@ LinkedList *str_split(char *data, char delim) {
   for (int i = 0; i <= data_len; i++) {
     if (data[i] == delim || data[i] == '\0' || i == data_len) {
       int size = i - start + 1;
-      char *line = calloc(size, sizeof(char));
+      char *line = calloc(size+1, sizeof(char));
       memcpy(line, data + start, i - start);
       line[size] = '\0';
       linked_list_push(list, (void *)line, size);
       start = i + 1;
+      free(line);
     }
   }
 

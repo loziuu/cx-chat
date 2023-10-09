@@ -11,6 +11,7 @@ void test_encode() {
   base64_encode(val, result, strlen(val));
 
   assert(strcmp(result, "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu") == 0);
+  free(result);
 }
 
 void test_encode_with_padding() {
@@ -20,6 +21,7 @@ void test_encode_with_padding() {
   base64_encode(val, result, strlen(val));
 
   assert(strcmp(result, "bGlnaHQgd29yay4=") == 0);
+  free(result);
 }
 
 void endcode_and_compare(char *val, char *expected) {

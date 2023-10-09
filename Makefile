@@ -19,8 +19,8 @@ DEPS = $(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
 
 CPPFLAGS := -I./src
 CC          := clang
-#CFLAGS      := -Wunsused-command-line-argument -lssl -lcrypto 
-CPPFLAGS    := -g -MMD -MP -I include
+CFLAGS      := -Wunsused-command-line-argument -lssl -lcrypto -fsanitize=address  
+CPPFLAGS    := -g -MMD -MP -I include 
 AR          := ar
 ARFLAGS     := -r -c -s
 

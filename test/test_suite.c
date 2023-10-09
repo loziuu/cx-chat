@@ -8,10 +8,10 @@
 int main() {
   printf("#----- Running test suite...\n");
   iterator_tests();
+  websocket_tests();
   linked_list_tests();
   hashmap_tests();
   base64_tests();
-  websocket_tests();
   printf("#----- Test suite complete.\n");
   return 0;
 }

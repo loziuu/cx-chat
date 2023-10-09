@@ -18,7 +18,7 @@ void push_three() {
   LinkedList *list = linked_list_new();
   
   linked_list_push(list, "Hello", 6);
-  linked_list_push(list, "Darkness", 8);
+  linked_list_push(list, "Darkness", 9);
   linked_list_push(list, "My old friend", 14);
 
   
@@ -32,7 +32,7 @@ void push_four() {
   LinkedList *list = linked_list_new();
   
   linked_list_push(list, "Hello", 6);
-  linked_list_push(list, "Darkness", 8);
+  linked_list_push(list, "Darkness", 9);
   linked_list_push(list, "My old friend", 14);
   linked_list_push(list, "ASD", 4);
   

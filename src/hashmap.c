@@ -1,4 +1,5 @@
 #include "hashmap.h"
+#include "memutils.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +7,13 @@
 // MAKE BUCKETS LAZY!
 HashMap *hashmap_init() {
   HashMap *map = malloc(sizeof(HashMap));
-  map->buckets = calloc(HASHMAP_BUCKETS, sizeof(HashMapBucket *));
+
+  for (int i = 0; i < HASHMAP_BUCKETS; i++) {
+    HashMapBucket *bucket = malloc(sizeof(HashMapBucket));
+    bucket->head = NULL;
+    map->buckets[i] = bucket;
+  }
+
   map->size = HASHMAP_BUCKETS;
   return map;
 }
@@ -27,7 +34,7 @@ hash_t calculcate_hash(char *key) {
 void hashmap_put(HashMap *map, char *key, void *data) {
   hash_t hash = calculcate_hash(key);
   uint32_t bucket_index = hash % map->size;
-  HashMapBucket *bucket = &map->buckets[bucket_index];
+  HashMapBucket *bucket = map->buckets[bucket_index];
 
   HashMapNode *prev = NULL;
   HashMapNode *node = bucket->head;
@@ -52,7 +59,7 @@ void hashmap_put(HashMap *map, char *key, void *data) {
 void *hashmap_get(HashMap *map, char *key) { 
   hash_t hash = calculcate_hash(key);
   uint32_t bucket_index = hash % map->size;
-  HashMapBucket *bucket = &map->buckets[bucket_index];
+  HashMapBucket *bucket = map->buckets[bucket_index];
   if (bucket->head == NULL) {
     return 0;
   }
@@ -65,19 +72,22 @@ void *hashmap_get(HashMap *map, char *key) {
   return 0;
 }
 
-void free_bucket(HashMapBucket *bucket) {
-  HashMapNode *node = bucket->head;
-  while (node != NULL) {
-    HashMapNode *next = node->next;
-    free(node);
-    node = next;
+void free_node(HashMapNode *node) {
+  if (node == NULL) {
+    return;
   }
+  free_node(node->next);
+  free(node);
+}
+
+void free_bucket(HashMapBucket *bucket) {
+  free_node(bucket->head);
   free(bucket);
 }
 
 void hashmap_free(HashMap *map) {
   for (int i = 0; i < map->size; i++) {
-    HashMapBucket *bucket = &map->buckets[i];
+    HashMapBucket *bucket = map->buckets[i];
     free_bucket(bucket);
   }
   free(map);

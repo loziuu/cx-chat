@@ -28,13 +28,24 @@ char *default_response =
     "Upgrade\nSec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\n\n";
 
 char *websocket_decode_key(char *client_key) {
+  unsigned char* digest;
+  char* concat;
+
   int key_len = strlen(client_key);
-  char *concat = malloc(key_len + magic_len); // 1 for /0
+  concat = calloc(key_len + magic_len+1, sizeof(char)); // 1 for /0
+                                                        //
   memcpy(concat, client_key, key_len);
   memcpy(concat + key_len, magic_string, magic_len);
-  unsigned char *digest = malloc(20);
-  unsigned char* hash = CC_SHA1_GEN((unsigned char*) concat, key_len+magic_len, digest);
-  return base64_encode_allocate(hash, 20);  
+  concat[key_len + magic_len] = '\0';
+
+  digest = malloc(20);
+
+  CC_SHA1_GEN((unsigned char*) concat, key_len+magic_len, digest);
+  char* result = base64_encode_allocate(digest, 20); 
+
+  free(concat);
+  free(digest);
+  return result;
 }
 
 void websocket_handle(int connfd) {
