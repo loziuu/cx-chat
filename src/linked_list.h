@@ -1,6 +1,7 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include <stdint.h>
 #include <stdlib.h>
 
 typedef struct Node {
@@ -23,5 +24,6 @@ void linked_list_free(LinkedList *list);
 
 LinkedList *str_split(char *data, char delim);
 LinkedList *str_split_lines(char *data);
+LinkedList *str_split_bytes(uint8_t *data, size_t size, char delim);
 
 #endif

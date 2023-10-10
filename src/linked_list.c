@@ -1,8 +1,9 @@
 #include "linked_list.h"
+#include "memutils.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "memutils.h"
 
 LinkedList *linked_list_new() {
   LinkedList *list = malloc(sizeof(LinkedList));
@@ -38,7 +39,7 @@ LinkedList *str_split(char *data, char delim) {
   for (int i = 0; i <= data_len; i++) {
     if (data[i] == delim || data[i] == '\0' || i == data_len) {
       int size = i - start + 1;
-      char *line = calloc(size+1, sizeof(char));
+      char *line = calloc(size + 1, sizeof(char));
       memcpy(line, data + start, i - start);
       line[size] = '\0';
       linked_list_push(list, (void *)line, size);
@@ -52,9 +53,7 @@ LinkedList *str_split(char *data, char delim) {
 
 // So far copying lines to new mem place.
 // It's eager now. can we do it lazily? Somehow?
-LinkedList *str_split_lines(char *data) {
-  return str_split(data, '\n');
-}
+LinkedList *str_split_lines(char *data) { return str_split(data, '\n'); }
 
 void node_free(Node *node) {
   if (node == 0) {
@@ -63,6 +62,28 @@ void node_free(Node *node) {
   node_free(node->next);
   free(node->data);
   free(node);
+}
+
+LinkedList *str_split_bytes(uint8_t *data, size_t size, char delim) {
+  LinkedList *list = linked_list_new();
+  int data_len = size;
+
+  int start = 0;
+
+  for (int i = 0; i <= data_len; i++) {
+    uint8_t byte = data[i];
+    if (data[i] == delim || data[i] == '\0' || i == data_len) {
+      int size = i - start + 1;
+      char *line = calloc(size + 1, sizeof(char));
+      memcpy(line, data + start, i - start);
+      line[size] = '\0';
+      linked_list_push(list, (void *)line, size);
+      start = i + 1;
+      free(line);
+    }
+  }
+
+  return list;
 }
 
 void linked_list_free(LinkedList *list) {
@@ -79,7 +100,7 @@ void *linked_list_pop(LinkedList *list) {
     list->head = node->next;
     void *data = node->data;
     free(node);
-    return data; 
+    return data;
   }
   return 0;
 }
