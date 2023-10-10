@@ -17,7 +17,7 @@ LinkedList *linked_list_new();
 int node_has_next(Node *node);
 
 void linked_list_push(LinkedList *list, void *data, size_t size);
-Node *linked_list_pop(LinkedList *list);
+void *linked_list_pop(LinkedList *list);
 
 void linked_list_free(LinkedList *list);
 

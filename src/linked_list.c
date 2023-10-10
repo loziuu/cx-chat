@@ -73,11 +73,13 @@ void linked_list_free(LinkedList *list) {
   free(list);
 }
 
-Node *linked_list_pop(LinkedList *list) {
+void *linked_list_pop(LinkedList *list) {
   Node *node = list->head;
   if (node != 0) {
     list->head = node->next;
-    return node;
+    void *data = node->data;
+    free(node);
+    return data; 
   }
   return 0;
 }

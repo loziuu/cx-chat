@@ -49,6 +49,7 @@ void hashmap_put(HashMap *map, char *key, void *data) {
   new_node->hash = hash;
   new_node->key = key;
   new_node->data = data;
+  new_node->next = 0;
   if (prev != NULL) {
     prev->next = new_node;
   } else { 
