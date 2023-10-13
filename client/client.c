@@ -34,13 +34,15 @@ int main() {
     return errno;
   }
   printf("Sending msg...");
+  char *msg = websocket_connect_request();
 
-  size_t len = 100;
-  char *input = malloc(len);
-  while (1) {
-    getline(&input, &len, stdin);
-    send(sock, input, strlen(input), 0);
-  }
+//  size_t len = 100;
+//  char *input = malloc(len);
+//  while (1) {
+//    getline(&input, &len, stdin);
+  printf("Sending %s", msg);
+    send(sock, msg, strlen(msg), 0);
+ // }
 
   return 0;
 }

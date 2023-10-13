@@ -36,9 +36,10 @@ void metadata_free(HandlerMetadata *metadata) {
   free(metadata);
 }
 
+// ADD ROUNTING!
 void handle_connection(HandlerMetadata *metadata) {
   // Pass to handler
-  websocket_handle(metadata->connfd);
+  websocket_handle_new_connection(metadata->connfd);
 
   // Clean up after done
   client_t[metadata->thread_id] = NULL;

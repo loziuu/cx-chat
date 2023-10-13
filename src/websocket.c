@@ -1,11 +1,11 @@
 #include "base64.h"
+#include "hashmap.h"
+#include "iterator.h"
 #include "linked_list.h"
 
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 const char *magic_string = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -30,15 +30,15 @@ char *default_response =
 char *websocket_decode_key(char *client_key) {
   unsigned char *digest;
   char *concat;
-
   int key_len = strlen(client_key);
+
+  digest = malloc(20);
   concat = calloc(key_len + magic_len + 1, sizeof(char)); // 1 for /0
-                                                          //
+
+  //
   memcpy(concat, client_key, key_len);
   memcpy(concat + key_len, magic_string, magic_len);
   concat[key_len + magic_len] = '\0';
-
-  digest = malloc(20);
 
   CC_SHA1_GEN((unsigned char *)concat, key_len + magic_len, digest);
   char *result = base64_encode_allocate(digest, 20);
@@ -48,35 +48,62 @@ char *websocket_decode_key(char *client_key) {
   return result;
 }
 
-// TODO: Make a loop that reads in chunks of 1024 bytes.
-// TODO: Clean up after return
 void websocket_handle(int *connfd) {
-  uint8_t request[65535];
-  //
+  char request[65535];
+
   // Read in loop, for now it's just bulk read into mem.
-  int status = 1;
+  read(*connfd, request, sizeof(request));
 
-  while ((write(*connfd, "ping", 4)) > 0) {
-    status = read(*connfd, request, sizeof(request));
+  LinkedList *lines = str_split_lines(request);
+  Node *node = lines->head;
 
-    if (status < 0) {
-      printf("Error reading from socket.\n");
-      break;
-    }
-
-    LinkedList *lines = str_split_bytes(request, status, '\n');
-    Node *node = lines->head;
-
-    printf("Printing request lines: \n");
-    while (node != 0) {
-      printf("%s\n", (char *)node->data);
-      node = node->next;
-    }
-    linked_list_free(lines);
-
-    // handle connection I guess
-    memset(request, 0, sizeof(request));
+  printf("Printing request lines: \n");
+  while (node != 0) {
+    printf("%s\n", (char *)node->data);
+    node = node->next;
   }
-  printf("Disconnecting...\n");
-  shutdown(*connfd, 2);
+  linked_list_free(lines);
+
+  // handle connection I guess
+  write(*connfd, default_response, strlen(default_response));
+  memset(request, 0, sizeof(request));
+}
+
+// Move hashmap to be passed as a argument :)
+HashMap *parse_request(Iterator *request_lines_iter) {
+  HashMap *request = hashmap_init();
+  Node *node = request_lines_iter->node;
+
+  // Parse first line, [HTTP_METHOD HTTP_PATH HTTP_VERSION]
+  LinkedList *words = str_split(node->data, ' ');
+
+  Iterator *words_iter = iter_from_linked_list(words);
+
+  hashmap_put(request, "method", iter_next(words_iter)->data);
+  hashmap_put(request, "path", iter_next(words_iter)->data);
+  hashmap_put(request, "version", iter_next(words_iter)->data);
+
+  free(words);
+  free(words_iter);
+  return request;
+}
+
+void websocket_handle_new_connection(int *connfd) {
+  char request[65535];
+
+  read(*connfd, request, sizeof(request));
+
+  LinkedList *lines = str_split_lines(request);
+  Iterator *iter = iter_from_linked_list(lines);
+
+  HashMap *request_map = parse_request(iter);
+  char *method = hashmap_get(request_map, "method");
+  char *path = hashmap_get(request_map, "path");
+  char *version = hashmap_get(request_map, "version");
+
+  printf("Method: %s, Path: %s, Version: %s, \n", method, path, version);
+
+  hashmap_free(request_map);
+  iter_free(iter);
+  linked_list_free(lines);
 }
