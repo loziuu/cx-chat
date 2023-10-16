@@ -2,7 +2,9 @@
 #include "hashmap_test.h"
 #include "iterator_test.h"
 #include "linked_list_test.h"
+#include "memutils_test.h"
 #include "websocket_test.h"
+
 #include <stdio.h>
 
 int main() {
@@ -12,6 +14,7 @@ int main() {
   linked_list_tests();
   hashmap_tests();
   base64_tests();
+  memutils_tests();
   printf("#----- Test suite complete.\n");
   return 0;
 }

@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "atomic.h"
 #include "linked_list.h"
 #include "memutils.h"
 #include "websocket.h"
@@ -18,9 +19,12 @@ typedef struct {
   int *connfd;
 } HandlerMetadata;
 
-extern int server_state;
+// TODO: Move it somewhere else I guess...
+extern AtomicInt *server_state;
 
+// TODO: Make it atomic (thread safety) obviously
 int thread_i = 0;
+
 pthread_t *client_t[NUMBER_OF_CLIENTS];
 static pthread_rwlock_t client_mutex = PTHREAD_RWLOCK_INITIALIZER;
 
@@ -36,17 +40,16 @@ void metadata_free(HandlerMetadata *metadata) {
   free(metadata);
 }
 
-// ADD ROUNTING!
+// TODO: ADD ROUTING!
 void handle_connection(HandlerMetadata *metadata) {
-  // Pass to handler
   websocket_handle_new_connection(metadata->connfd);
 
-  // Clean up after done
-  client_t[metadata->thread_id] = NULL;
+  shutdown(*metadata->connfd, 2);
 
   pthread_rwlock_wrlock(&client_mutex);
   thread_i--;
   free(client_t[metadata->thread_id]);
+  client_t[metadata->thread_id] = NULL;
   pthread_rwlock_unlock(&client_mutex);
 
   metadata_free(metadata);
@@ -56,20 +59,20 @@ void add_client(int connfd) {
   printf("Adding client...");
   pthread_rwlock_wrlock(&client_mutex);
 
-
   if (thread_i < NUMBER_OF_CLIENTS && client_t[thread_i] == NULL) {
     // TODO: Freed in handle_connection
     pthread_t *client_thread = malloc(sizeof(pthread_t));
+    client_t[thread_i] = client_thread;
 
     HandlerMetadata *metadata = metadata_create(thread_i, connfd);
     int result = pthread_create(client_thread, NULL, (void *)handle_connection,
                                 metadata);
     if (result == 0) {
       printf("Created new thread for client.\n");
-      client_t[thread_i] = client_thread;
       thread_i++;
     } else {
       printf("Error creating thread for client: %d\n", result);
+      free(client_thread);
       metadata_free(metadata);
     }
   } else {
@@ -81,7 +84,7 @@ void add_client(int connfd) {
 
 /* TODO: Add thread per connection
  * I guess it's already done to some degree...
-*/
+ */
 void server_run() {
   for (int i = 0; i < NUMBER_OF_CLIENTS; i++) {
     client_t[i] = NULL;
@@ -105,10 +108,10 @@ void server_run() {
     return;
   }
 
-  printf("Server listening on port %d.\n Server state: %d\n.", DEFAULT_PORT,
-         server_state);
-  // USE DEFINED CONSTANTS FOR STATE
-  while (server_state == 0) {
+  int result;
+  // TODO: USE DEFINED CONSTANTS FOR STATE
+  while ((result = atomic_read(server_state)) == 0) {
+    printf("Server state: %d\n", result);
     printf("Waiting for new clients...\n");
     int connfd;
     struct sockaddr_in client_addr;
@@ -125,4 +128,17 @@ void server_run() {
     }
   }
   shutdown(server_socket, 2);
+}
+
+void send_echo() {
+  struct sockaddr_in addr;
+  int serverfd;
+  int sock;
+  addr = (struct sockaddr_in){.sin_family = AF_INET,
+                              .sin_port = htons(42069),
+                              .sin_addr.s_addr = INADDR_ANY};
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  serverfd = connect(sock, (struct sockaddr *)&addr, sizeof(addr));
+  send(sock, "echo", 4, 0);
+  shutdown(serverfd, 2);
 }

@@ -2,5 +2,6 @@
 #define SERVER_H
 
 void server_run();
+void send_echo();
 
 #endif 

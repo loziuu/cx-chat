@@ -3,28 +3,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "atomic.h"
 #include "server.h"
-
-// Mutex for server state
-static pthread_rwlock_t server_mutex;
+#include "web.h"
 
 /*
  * 0 - running
  * 1 - shutting down
  * 2 - shutdown
  */
-int server_state = 0;
+AtomicInt *server_state;
+
+pthread_t server_thread;
+pthread_t web_thread;
 
 void shutdown_server() {
-  pthread_rwlock_wrlock(&server_mutex);
-  server_state = 1;
-  pthread_rwlock_unlock(&server_mutex);
+  atomic_set(server_state, 1);
+  send_echo();
 }
 
 int main() {
-  pthread_t server_thread;
+  server_state = atomic_init(0);
+  int result;
 
-  int result = pthread_create(&server_thread, NULL, (void *)server_run, NULL);
+  if ((result =
+           pthread_create(&web_thread, NULL, (void *)run_web, NULL) != 0)) {
+    printf("Error creating web server thread: %d\n", result);
+    exit(1);
+  }
+
+  result = pthread_create(&server_thread, NULL, (void *)server_run, NULL);
   if (result != 0) {
     printf("Error creating server thread: %d\n", result);
     exit(1);
@@ -32,7 +40,7 @@ int main() {
 
   printf("Starting server...");
   char *input = malloc(100);
-  while (1) { 
+  while (1) {
     printf("Server > ");
     scanf("%s", input);
     printf("\n");
@@ -43,9 +51,10 @@ int main() {
   }
   free(input);
 
+  pthread_join(web_thread, NULL);
   pthread_join(server_thread, NULL);
-  pthread_rwlock_destroy(&server_mutex);
-  server_state = 2;
+  atomic_set(server_state, 2);
+  atomic_free(server_state);
   printf("Server shut down.\n");
   return 0;
 }

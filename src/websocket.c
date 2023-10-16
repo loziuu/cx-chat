@@ -23,9 +23,13 @@ const int magic_len = 36;
 #define CC_SHA1_GEN SHA1
 #endif
 
-char *default_response =
+char *switching_protocols_response = 
     "HTTP/1.1 101 Switching Protocols\nUpgrade: websocket\nConnection: "
-    "Upgrade\nSec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\n\n";
+    "Upgrade\nSec-WebSocket-Accept: \n\n";
+int default_response_len = 135; 
+
+char *hello_world_resp = 
+    "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 11\n\nHello World";
 
 char *websocket_decode_key(char *client_key) {
   unsigned char *digest;
@@ -65,7 +69,7 @@ void websocket_handle(int *connfd) {
   linked_list_free(lines);
 
   // handle connection I guess
-  write(*connfd, default_response, strlen(default_response));
+  write(*connfd, switching_protocols_response, default_response_len);
   memset(request, 0, sizeof(request));
 }
 
@@ -83,8 +87,8 @@ HashMap *parse_request(Iterator *request_lines_iter) {
   hashmap_put(request, "path", iter_next(words_iter)->data);
   hashmap_put(request, "version", iter_next(words_iter)->data);
 
-  free(words);
-  free(words_iter);
+  iter_free(words_iter);
+  linked_list_free(words);
   return request;
 }
 
@@ -92,6 +96,11 @@ void websocket_handle_new_connection(int *connfd) {
   char request[65535];
 
   read(*connfd, request, sizeof(request));
+  
+  if (strstr(request, "echo") != NULL) {
+    printf("Echo!\n");
+    return;
+  }
 
   LinkedList *lines = str_split_lines(request);
   Iterator *iter = iter_from_linked_list(lines);
@@ -101,7 +110,8 @@ void websocket_handle_new_connection(int *connfd) {
   char *path = hashmap_get(request_map, "path");
   char *version = hashmap_get(request_map, "version");
 
-  printf("Method: %s, Path: %s, Version: %s, \n", method, path, version);
+  write(*connfd, hello_world_resp, strlen(hello_world_resp));
+  memset(request, 0, sizeof(request));
 
   hashmap_free(request_map);
   iter_free(iter);
